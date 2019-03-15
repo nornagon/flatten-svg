@@ -1,6 +1,6 @@
 {
   "name": "flatten-svg",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -8,6 +8,13 @@
     "prepare": "tsc"
   },
   "author": "Jeremy Apthorp <nornagon@nornagon.net>",
+  "keywords": [
+    "svg",
+    "flatten",
+    "paths",
+    "points"
+  ],
+  "repository": "github:nornagon/flatten-svg",
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^24.0.11",
