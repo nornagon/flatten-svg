@@ -1,5 +1,5 @@
 {
-  "name": "svg-to-paths",
+  "name": "flatten-svg",
   "version": "0.1.0",
   "description": "",
   "main": "dist/index.js",
