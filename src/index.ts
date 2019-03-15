@@ -1,1 +1,1 @@
-export {svgToPaths} from "./svg-to-paths"
+export {flattenSVG} from "./svg-to-paths"

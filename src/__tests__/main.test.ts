@@ -1,4 +1,4 @@
-import {svgToPaths} from './svg-to-paths';
+import {flattenSVG} from '../svg-to-paths';
 import {Window} from 'svgdom';
 
 function parseSvg(svg: string) {
@@ -9,12 +9,12 @@ function parseSvg(svg: string) {
 
 test('empty svg', () => {
   const window = new Window
-  const x = svgToPaths(window.document.documentElement)
+  const x = flattenSVG(window.document.documentElement)
   expect(x).toEqual([])
 })
 
 test('rect', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <rect x="0" y="0" width="100" height="100" />
   `))
   expect(x).toEqual([
@@ -23,7 +23,7 @@ test('rect', () => {
 })
 
 test('simple path', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10" />
   `))
   expect(x).toEqual([
@@ -32,7 +32,7 @@ test('simple path', () => {
 })
 
 test('simple path with stroke', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10" stroke="red"/>
   `))
   expect(x).toEqual([
@@ -41,7 +41,7 @@ test('simple path with stroke', () => {
 })
 
 test('multiple paths', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10" />
     <path d="M10 10L20 20" />
   `))
@@ -52,7 +52,7 @@ test('multiple paths', () => {
 })
 
 test('paths with multiple parts', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10M10 10L20 20" />
   `))
   expect(x).toEqual([
@@ -62,7 +62,7 @@ test('paths with multiple parts', () => {
 })
 
 test('transformed simple path', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10" transform="translate(10 10)" />
   `))
   expect(x).toEqual([
@@ -71,7 +71,7 @@ test('transformed simple path', () => {
 })
 
 test('transformed group with simple path', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <g transform="translate(10 10)">
       <path d="M0 0L10 10" />
     </g>
@@ -82,7 +82,7 @@ test('transformed group with simple path', () => {
 })
 
 test('circle', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <circle cx="0" cy="0" r="10" />
   `))
   expect(x).toHaveLength(1)
@@ -93,7 +93,7 @@ test('circle', () => {
 })
 
 test('ignores clipPaths', () => {
-  const x = svgToPaths(parseSvg(`
+  const x = flattenSVG(parseSvg(`
     <g clip-path="url(#clip0)">
       <path d="M0 0L10 10" />
     </g>

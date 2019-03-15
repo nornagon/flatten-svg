@@ -89,7 +89,7 @@ interface Line {
   stroke?: string;
 }
 
-export function svgToPaths(svg: SVGElement, options: Partial<Options> = {}): Line[] {
+export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Line[] {
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
   const paths = []
