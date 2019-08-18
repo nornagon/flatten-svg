@@ -96,8 +96,14 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
   for (const path of walkSvgShapes(svg)) {
     const type = path.nodeName.toLowerCase()
     const ctm = (path as SVGGraphicsElement).getCTM()
-    const xf = ([x,y]: [number, number]): Point => { svgPoint.x = x; svgPoint.y = y;
-      const xfd = svgPoint.matrixTransform(ctm); return [xfd.x, xfd.y] }
+    const xf = ctm == null
+      ? ([x,y]: [number, number]): Point => { return [x, y]; }
+      : ([x,y]: [number, number]): Point => {
+          svgPoint.x = x;
+          svgPoint.y = y;
+          const xfd = svgPoint.matrixTransform(ctm);
+          return [xfd.x, xfd.y]
+        };
     const pathData = getPathData(path, {normalize: true})
     let cur: Point = null
     let closePoint = null
