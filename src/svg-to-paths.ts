@@ -93,9 +93,8 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
   const paths = []
-  for (const path of walkSvgShapes(svg)) {
-    const type = path.nodeName.toLowerCase()
-    const ctm = (path as SVGGraphicsElement).getCTM()
+  for (const shape of walkSvgShapes(svg)) {
+    const ctm = (shape as SVGGraphicsElement).getCTM()
     const xf = ctm == null
       ? ([x,y]: [number, number]): Point => { return [x, y]; }
       : ([x,y]: [number, number]): Point => {
@@ -104,7 +103,7 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
           const xfd = svgPoint.matrixTransform(ctm);
           return [xfd.x, xfd.y]
         };
-    const pathData = getPathData(path, {normalize: true})
+    const pathData = getPathData(shape, {normalize: true})
     let cur: Point = null
     let closePoint = null
     for (const cmd of pathData) {
@@ -113,9 +112,9 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         closePoint = cur
         paths.push({
           points: [cur],
-          stroke: path.getAttribute('stroke')
+          stroke: shape.getAttribute('stroke')
           // getComputedStyle doesn't seem to work until the JS loop that inserted it is done...
-          // stroke: path.getComputedStyle(path).stroke
+          // stroke: shape.getComputedStyle(shape).stroke
         });
       } else if (cmd.type === 'L') {
         cur = xf(cmd.values)
