@@ -106,3 +106,28 @@ test('ignores clipPaths', () => {
   expect(x).toHaveLength(1)
   expect(x[0].points).toEqual([[0, 0], [10, 10]])
 })
+
+test('gets stroke from style', () => {
+  const x = flattenSVG(parseSvg(`
+    <path d="M0 0L10 10" style="stroke: green" />
+  `))
+  expect(x[0].stroke).toEqual('green')
+})
+
+test('gets stroke from parent style', () => {
+  const x = flattenSVG(parseSvg(`
+    <g style="stroke: green">
+      <path d="M0 0L10 10" />
+    </g>
+  `))
+  expect(x[0].stroke).toEqual('green')
+})
+
+test('gets stroke from parent attr', () => {
+  const x = flattenSVG(parseSvg(`
+    <g stroke="green">
+      <path d="M0 0L10 10" />
+    </g>
+  `))
+  expect(x[0].stroke).toEqual('green')
+})

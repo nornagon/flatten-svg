@@ -89,6 +89,16 @@ interface Line {
   stroke?: string;
 }
 
+function getStroke(shape: SVGElement): string | null {
+  const explicitStroke = shape.getAttribute('stroke') || shape.style.stroke
+  if (explicitStroke) {
+    return explicitStroke
+  } else if (shape.parentNode) {
+    return getStroke(shape.parentNode as SVGElement)
+  }
+  return null
+}
+
 export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Line[] {
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
@@ -112,9 +122,7 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         closePoint = cur
         paths.push({
           points: [cur],
-          stroke: shape.getAttribute('stroke')
-          // getComputedStyle doesn't seem to work until the JS loop that inserted it is done...
-          // stroke: shape.getComputedStyle(shape).stroke
+          stroke: getStroke(shape),
         });
       } else if (cmd.type === 'L') {
         cur = xf(cmd.values)
