@@ -90,6 +90,7 @@ interface Line {
 }
 
 function getStroke(shape: SVGElement): string | null {
+  if (!shape) return null
   const explicitStroke = shape.getAttribute('stroke') || shape.style.stroke
   if (explicitStroke) {
     return explicitStroke
