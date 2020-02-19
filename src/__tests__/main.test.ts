@@ -17,18 +17,16 @@ test('rect', () => {
   const x = flattenSVG(parseSvg(`
     <rect x="0" y="0" width="100" height="100" />
   `))
-  expect(x).toEqual([
-    {points: [[0,0], [100,0], [100,100], [0,100], [0,0]], stroke: null}
-  ])
+  expect(x).toHaveLength(1)
+  expect(x[0].points).toEqual([[0,0], [100,0], [100,100], [0,100], [0,0]])
 })
 
 test('simple path', () => {
   const x = flattenSVG(parseSvg(`
     <path d="M0 0L10 10" />
   `))
-  expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: null}
-  ])
+  expect(x).toHaveLength(1)
+  expect(x[0].points).toEqual([[0,0], [10,10]])
 })
 
 test('simple path with stroke', () => {
@@ -36,7 +34,7 @@ test('simple path with stroke', () => {
     <path d="M0 0L10 10" stroke="red"/>
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: "red"}
+    {points: [[0,0], [10,10]], stroke: "red", groupId: null}
   ])
 })
 
@@ -46,8 +44,8 @@ test('multiple paths', () => {
     <path d="M10 10L20 20" />
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: null},
-    {points: [[10,10], [20,20]], stroke: null}
+    {points: [[0,0], [10,10]], stroke: null, groupId: null},
+    {points: [[10,10], [20,20]], stroke: null, groupId: null}
   ])
 })
 
@@ -56,8 +54,8 @@ test('paths with multiple parts', () => {
     <path d="M0 0L10 10M10 10L20 20" />
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: null},
-    {points: [[10,10], [20,20]], stroke: null}
+    {points: [[0,0], [10,10]], stroke: null, groupId: null},
+    {points: [[10,10], [20,20]], stroke: null, groupId: null}
   ])
 })
 
@@ -66,7 +64,7 @@ test('transformed simple path', () => {
     <path d="M0 0L10 10" transform="translate(10 10)" />
   `))
   expect(x).toEqual([
-    {points: [[10,10], [20,20]], stroke: null}
+    {points: [[10,10], [20,20]], stroke: null, groupId: null}
   ])
 })
 
@@ -77,7 +75,7 @@ test('transformed group with simple path', () => {
     </g>
   `))
   expect(x).toEqual([
-    {points: [[10,10], [20,20]], stroke: null}
+    {points: [[10,10], [20,20]], stroke: null, groupId: null}
   ])
 })
 
@@ -130,4 +128,46 @@ test('gets stroke from parent attr', () => {
     </g>
   `))
   expect(x[0].stroke).toEqual('green')
+})
+
+test('gets group id', () => {
+  const x = flattenSVG(parseSvg(`
+    <g id="abc">
+      <path d="M0 0L10 10" />
+    </g>
+  `))
+  expect(x[0].groupId).toEqual('abc')
+})
+
+test('gets group id when nested', () => {
+  const x = flattenSVG(parseSvg(`
+    <g id="abc">
+      <g>
+        <path d="M0 0L10 10" />
+      </g>
+    </g>
+  `))
+  expect(x[0].groupId).toEqual('abc')
+})
+
+test('gets innermost group id', () => {
+  const x = flattenSVG(parseSvg(`
+    <g id="abc">
+      <g id="def">
+        <path d="M0 0L10 10" />
+      </g>
+    </g>
+  `))
+  expect(x[0].groupId).toEqual('def')
+})
+
+test('ignores ids on non-<g> elements', () => {
+  const x = flattenSVG(parseSvg(`
+    <g id="abc">
+      <a id="def">
+        <path d="M0 0L10 10" />
+      </a>
+    </g>
+  `))
+  expect(x[0].groupId).toEqual('abc')
 })

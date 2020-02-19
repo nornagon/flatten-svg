@@ -62,6 +62,7 @@ function* walkSvgShapes(svgEl: SVGElement): IterableIterator<SVGElement> {
   switch (svgEl.nodeName.toLowerCase()) {
     case 'svg':
     case 'g':
+    case 'a':
       for (const child of svgEl.children) {
         yield* walkSvgShapes(child as SVGElement)
       }
@@ -87,6 +88,7 @@ type Point = [number, number]
 interface Line {
   points: Point[];
   stroke?: string;
+  groupId?: string;
 }
 
 function getStroke(shape: SVGElement): string | null {
@@ -94,8 +96,20 @@ function getStroke(shape: SVGElement): string | null {
   const explicitStroke = shape.getAttribute('stroke') || shape.style.stroke
   if (explicitStroke) {
     return explicitStroke
-  } else if (shape.parentNode) {
+  }
+  if (shape.parentNode) {
     return getStroke(shape.parentNode as SVGElement)
+  }
+  return null
+}
+
+function getGroupId(shape: SVGElement): string | null {
+  if (!shape) return null
+  if (shape.id && shape.nodeName.toLowerCase() === 'g') {
+    return shape.id
+  }
+  if (shape.parentNode) {
+    return getGroupId(shape.parentNode as SVGElement)
   }
   return null
 }
@@ -124,6 +138,7 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         paths.push({
           points: [cur],
           stroke: getStroke(shape),
+          groupId: getGroupId(shape)
         });
       } else if (cmd.type === 'L') {
         cur = xf(cmd.values)
