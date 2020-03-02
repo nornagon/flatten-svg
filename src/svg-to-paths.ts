@@ -97,6 +97,7 @@ function getStroke(shape: SVGElement): string | null {
   if (explicitStroke) {
     return explicitStroke
   }
+  if (shape === shape.ownerSVGElement || !shape.ownerSVGElement) return null
   if (shape.parentNode) {
     return getStroke(shape.parentNode as SVGElement)
   }
