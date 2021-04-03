@@ -83,7 +83,7 @@ interface Options {
   maxError: number;
 }
 
-type Point = [number, number]
+type Point = [number, number] & {x: number, y: number}
 
 interface Line {
   points: Point[];
@@ -115,6 +115,13 @@ function getGroupId(shape: SVGElement): string | null {
   return null
 }
 
+function point(x: number, y: number): Point {
+  const pt = [x, y];
+  (pt as any).x = x;
+  (pt as any).y = y;
+  return pt as any
+}
+
 export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Line[] {
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
@@ -122,12 +129,12 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
   for (const shape of walkSvgShapes(svg)) {
     const ctm = (shape as SVGGraphicsElement).getCTM()
     const xf = ctm == null
-      ? ([x,y]: [number, number]): Point => { return [x, y]; }
+      ? ([x,y]: [number, number]): Point => { return point(x, y); }
       : ([x,y]: [number, number]): Point => {
           svgPoint.x = x;
           svgPoint.y = y;
           const xfd = svgPoint.matrixTransform(ctm);
-          return [xfd.x, xfd.y]
+          return point(xfd.x, xfd.y)
         };
     const pathData = getPathData(shape, {normalize: true})
     let cur: Point = null
@@ -152,9 +159,9 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         const [tx3, ty3] = xf([x3, y3])
         const parts = flatten([x0, y0, tx1, ty1, tx2, ty2, tx3, ty3], maxError)
         for (const part of parts) {
-          paths[paths.length-1].points.push([part[6], part[7]])
+          paths[paths.length-1].points.push(point(part[6], part[7]))
         }
-        cur = [tx3, ty3]
+        cur = point(tx3, ty3)
       } else if (cmd.type === 'A') {
         const [rx_, ry_, xAxisRotation, largeArc, sweep, x, y] = cmd.values
         const phi = xAxisRotation
@@ -221,9 +228,9 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
           const theta = t1 + dt * i/n
           const tx = cos(phi) * rx * cos(theta) - sin(phi) * ry * sin(theta) + cx
           const ty = sin(phi) * rx * cos(theta) + cos(phi) * ry * sin(theta) + cy
-          paths[paths.length-1].points.push([tx,ty])
+          paths[paths.length-1].points.push(point(tx, ty))
         }
-        cur = [x, y]
+        cur = point(x, y)
       } else if (cmd.type === 'Z') {
         if (closePoint && (cur[0] !== closePoint[0] || cur[1] !== closePoint[1])) {
           paths[paths.length-1].points.push(closePoint)

@@ -62,5 +62,7 @@ Returns `Line[]`
 ### Line
 
 Properties:
-* `points` \[number, number][] - list of points on the line
+* `points` (\[number, number] & {x: number, y: number})[] - list of points on the line
 * `stroke` ?string - if present, the `stroke` property of the line
+
+Points on the line are two-element arrays ([x, y]), but also have .x and .y properties.
