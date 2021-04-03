@@ -7,6 +7,18 @@ function parseSvg(svg: string) {
   return window.document.documentElement
 }
 
+type Point = [number, number] & {x: number, y: number}
+function pt(x: number, y: number): Point {
+  const pt = [x, y];
+  (pt as any).x = x;
+  (pt as any).y = y;
+  return pt as any
+}
+
+function pts(arr: [number, number][]): Point[] {
+  return arr.map(([x, y]) => pt(x, y))
+}
+
 test('empty svg', () => {
   const window = new Window
   const x = flattenSVG(window.document.documentElement)
@@ -18,7 +30,7 @@ test('rect', () => {
     <rect x="0" y="0" width="100" height="100" />
   `))
   expect(x).toHaveLength(1)
-  expect(x[0].points).toEqual([[0,0], [100,0], [100,100], [0,100], [0,0]])
+  expect(x[0].points).toEqual(pts([[0,0], [100,0], [100,100], [0,100], [0,0]]))
 })
 
 test('simple path', () => {
@@ -26,7 +38,7 @@ test('simple path', () => {
     <path d="M0 0L10 10" />
   `))
   expect(x).toHaveLength(1)
-  expect(x[0].points).toEqual([[0,0], [10,10]])
+  expect(x[0].points).toEqual(pts([[0,0], [10,10]]))
 })
 
 test('simple path with stroke', () => {
@@ -34,7 +46,7 @@ test('simple path with stroke', () => {
     <path d="M0 0L10 10" stroke="red"/>
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: "red", groupId: null}
+    {points: pts([[0,0], [10,10]]), stroke: "red", groupId: null}
   ])
 })
 
@@ -44,8 +56,8 @@ test('multiple paths', () => {
     <path d="M10 10L20 20" />
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: null, groupId: null},
-    {points: [[10,10], [20,20]], stroke: null, groupId: null}
+    {points: pts([[0,0], [10,10]]), stroke: null, groupId: null},
+    {points: pts([[10,10], [20,20]]), stroke: null, groupId: null}
   ])
 })
 
@@ -54,8 +66,8 @@ test('paths with multiple parts', () => {
     <path d="M0 0L10 10M10 10L20 20" />
   `))
   expect(x).toEqual([
-    {points: [[0,0], [10,10]], stroke: null, groupId: null},
-    {points: [[10,10], [20,20]], stroke: null, groupId: null}
+    {points: pts([[0,0], [10,10]]), stroke: null, groupId: null},
+    {points: pts([[10,10], [20,20]]), stroke: null, groupId: null}
   ])
 })
 
@@ -64,7 +76,7 @@ test('transformed simple path', () => {
     <path d="M0 0L10 10" transform="translate(10 10)" />
   `))
   expect(x).toEqual([
-    {points: [[10,10], [20,20]], stroke: null, groupId: null}
+    {points: pts([[10,10], [20,20]]), stroke: null, groupId: null}
   ])
 })
 
@@ -75,7 +87,7 @@ test('transformed group with simple path', () => {
     </g>
   `))
   expect(x).toEqual([
-    {points: [[10,10], [20,20]], stroke: null, groupId: null}
+    {points: pts([[10,10], [20,20]]), stroke: null, groupId: null}
   ])
 })
 
@@ -102,7 +114,7 @@ test('ignores clipPaths', () => {
     </defs>
   `))
   expect(x).toHaveLength(1)
-  expect(x[0].points).toEqual([[0, 0], [10, 10]])
+  expect(x[0].points).toEqual(pts([[0, 0], [10, 10]]))
 })
 
 test('gets stroke from style', () => {
