@@ -1,6 +1,6 @@
 {
   "name": "flatten-svg",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "",
   "main": "dist/index.js",
   "scripts": {
@@ -18,10 +18,10 @@
   "license": "ISC",
   "devDependencies": {
     "@types/jest": "^24.0.11",
-    "jest": "^24.5.0",
-    "ts-jest": "^24.0.0",
-    "typescript": "^3.3.3333",
-    "svgdom": "0.0.18"
+    "jest": "^26.0.0",
+    "svgdom": "0.0.18",
+    "ts-jest": "^26.5.4",
+    "typescript": "^3.3.3333"
   },
   "files": [
     "/dist/*.js",
