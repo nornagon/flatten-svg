@@ -117,15 +117,15 @@ function getGroupId(shape: SVGElement): string | null {
 
 function point(x: number, y: number): Point {
   const pt = [x, y];
-  (pt as any).x = x;
-  (pt as any).y = y;
-  return pt as any
+  (pt as Point).x = x;
+  (pt as Point).y = y;
+  return pt as Point
 }
 
 export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Line[] {
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
-  const paths = []
+  const paths: Line[] = []
   for (const shape of walkSvgShapes(svg)) {
     const ctm = (shape as SVGGraphicsElement).getCTM()
     const xf = ctm == null
@@ -137,22 +137,25 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
           return point(xfd.x, xfd.y)
         };
     const pathData = getPathData(shape, {normalize: true})
-    let cur: Point = null
-    let closePoint = null
+    let cur: Point | null = null
+    let closePoint: Point | null = null
     for (const cmd of pathData) {
       if (cmd.type === 'M') {
         cur = xf(cmd.values)
         closePoint = cur
         paths.push({
           points: [cur],
-          stroke: getStroke(shape),
-          groupId: getGroupId(shape)
+          stroke: getStroke(shape) ?? undefined,
+          groupId: getGroupId(shape) ?? undefined
         });
       } else if (cmd.type === 'L') {
         cur = xf(cmd.values)
         paths[paths.length-1].points.push(cur)
       } else if (cmd.type === 'C') {
         const [x1, y1, x2, y2, x3, y3] = cmd.values
+        if (cur === null) {
+          throw new Error(`C ${cmd.values} encountered without current point`)
+        }
         const [x0, y0] = cur
         const [tx1, ty1] = xf([x1, y1])
         const [tx2, ty2] = xf([x2, y2])
@@ -168,7 +171,9 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         const fS = sweep
         const fA = largeArc
         const {cos, sin, atan2, sqrt, sign, acos, abs, ceil} = Math
-
+        if (cur === null) {
+          throw new Error(`A ${cmd.values} encountered without current point`)
+        }
         // https://www.w3.org/TR/SVG/implnote.html#ArcImplementationNotes
         const mpx = (cur[0] - x)/2,
               mpy = (cur[1] - y)/2
@@ -232,11 +237,14 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         }
         cur = point(x, y)
       } else if (cmd.type === 'Z') {
+        if (cur === null) {
+          throw new Error(`Z encountered without current point`)
+        }
         if (closePoint && (cur[0] !== closePoint[0] || cur[1] !== closePoint[1])) {
           paths[paths.length-1].points.push(closePoint)
         }
       } else {
-        throw Error(`Unexpected path command: "${cmd}"`)
+        throw Error(`Unexpected path command: "${cmd.type}" ${cmd.values}`)
       }
     }
   }
