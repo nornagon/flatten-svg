@@ -1,8 +1,8 @@
 import {flattenSVG} from '../svg-to-paths';
-import {Window} from 'svgdom';
+import {createSVGWindow} from 'svgdom';
 
 function parseSvg(svg: string) {
-  const window = new Window
+  const window = createSVGWindow()
   window.document.documentElement.innerHTML = svg
   return window.document.documentElement
 }
@@ -20,7 +20,7 @@ function pts(arr: [number, number][]): Point[] {
 }
 
 test('empty svg', () => {
-  const window = new Window
+  const window = createSVGWindow()
   const x = flattenSVG(window.document.documentElement)
   expect(x).toEqual([])
 })
