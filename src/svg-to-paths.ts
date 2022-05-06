@@ -175,11 +175,8 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         }
         cur = point(tx3, ty3)
       } else if (cmd.type === 'A') {
-        const [rx_, ry_, xAxisRotation, largeArc, sweep, x, y] = cmd.values
-        const phi = xAxisRotation
-        const fS = sweep
-        const fA = largeArc
-        const {cos, sin, atan2, sqrt, sign, acos, abs, ceil} = Math
+        const [rx_, ry_, phi, fA, fS, x, y] = cmd.values
+        const {cos, sin, sqrt, acos, abs, ceil} = Math
         if (cur === null) {
           throw new Error(`A ${cmd.values} encountered without current point`)
         }
@@ -228,8 +225,7 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
 
         // https://i.imgur.com/JORhNjU.jpg
         // maximum error based on maximum deviation from true arc
-        const e0 = maxError
-        const n = ceil(abs(dt) / acos(1-e0/rx))
+        const n = ceil(abs(dt) / acos(1-maxError/rx))
 
         for (let i = 1; i <= n; i++) {
           const theta = t1 + dt * i/n
