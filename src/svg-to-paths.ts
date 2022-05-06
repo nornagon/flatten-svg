@@ -122,6 +122,15 @@ function point(x: number, y: number): Point {
   return pt as Point
 }
 
+function ang(ux: number, uy: number, vx: number, vy: number) {
+  /*
+  (ux*vy - uy*vx < 0 ? -1 : 1) *
+    acos((ux*vx+uy*vy) / sqrt(ux*ux+uy*uy)*sqrt(vx*vx+vy*vy))
+    */
+  // https://github.com/paperjs/paper.js/blob/f5366fb3cb53bc1ea52e9792e2ec2584c0c4f9c1/src/path/Path.js#L2516
+  return Math.atan2(ux * vy - uy * vx, ux * vx + uy * vy)
+}
+
 export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Line[] {
   const {maxError = 0.1} = options;
   const svgPoint = (svg as any).createSVGPoint()
@@ -196,14 +205,7 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
               cy_ = k * -ry * x1_ / rx
         const cx = cos(phi) * cx_ - sin(phi) * cy_ + (cur[0] + x)/2,
               cy = sin(phi) * cx_ + cos(phi) * cy_ + (cur[1] + y)/2
-        const ang = (ux: number, uy: number, vx: number, vy: number) => {
-          /*
-          (ux*vy - uy*vx < 0 ? -1 : 1) *
-            acos((ux*vx+uy*vy) / sqrt(ux*ux+uy*uy)*sqrt(vx*vx+vy*vy))
-            */
-          // https://github.com/paperjs/paper.js/blob/f5366fb3cb53bc1ea52e9792e2ec2584c0c4f9c1/src/path/Path.js#L2516
-          return atan2(ux * vy - uy * vx, ux*vx + uy*vy)
-        }
+
         const t1 = ang(1, 0, (x1_-cx_)/rx, (y1_-cy_)/ry)
         const dt_ = ang((x1_-cx_)/rx, (y1_-cy_)/ry, (-x1_-cx_)/rx,
           (-y1_-cy_)/ry) % (Math.PI*2)
