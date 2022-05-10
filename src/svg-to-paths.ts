@@ -91,28 +91,28 @@ interface Line {
   groupId?: string;
 }
 
-function getStroke(shape: SVGElement): string | null {
-  if (!shape) return null
+function getStroke(shape: SVGElement): string | undefined {
+  if (!shape) return undefined
   const explicitStroke = shape.getAttribute('stroke') || shape.style.stroke
   if (explicitStroke) {
     return explicitStroke
   }
-  if (shape === shape.ownerSVGElement || !shape.ownerSVGElement) return null
+  if (shape === shape.ownerSVGElement || !shape.ownerSVGElement) return undefined
   if (shape.parentNode) {
     return getStroke(shape.parentNode as SVGElement)
   }
-  return null
+  return undefined
 }
 
-function getGroupId(shape: SVGElement): string | null {
-  if (!shape) return null
+function getGroupId(shape: SVGElement): string | undefined {
+  if (!shape) return undefined
   if (shape.id && shape.nodeName.toLowerCase() === 'g') {
     return shape.id
   }
   if (shape.parentNode) {
     return getGroupId(shape.parentNode as SVGElement)
   }
-  return null
+  return undefined
 }
 
 function point(x: number, y: number): Point {
@@ -154,8 +154,8 @@ export function flattenSVG(svg: SVGElement, options: Partial<Options> = {}): Lin
         closePoint = cur
         paths.push({
           points: [cur],
-          stroke: getStroke(shape) ?? undefined,
-          groupId: getGroupId(shape) ?? undefined
+          stroke: getStroke(shape),
+          groupId: getGroupId(shape),
         });
       } else if (cmd.type === 'L') {
         cur = xf(cmd.values)
